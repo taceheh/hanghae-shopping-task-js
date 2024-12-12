@@ -8,22 +8,24 @@ import { PRODUCT_PAGE_SIZE } from '@/constants';
 import { extractIndexLink, isFirebaseIndexError } from '@/helpers/error';
 import { useModal } from '@/hooks/useModal';
 import { FirebaseIndexErrorModal } from '@/pages/error/components/FirebaseIndexErrorModal';
-import { selectIsLogin, selectUser } from '@/store/auth/authSelectors';
+// import { selectIsLogin, selectUser } from '@/store/auth/authSelectors';
 import { addCartItem } from '@/store/cart/cartSlice';
 import { selectFilter } from '@/store/filter/filterSelectors';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { loadProducts } from '@/store/product/productsActions';
-import {
-  selectHasNextPage,
-  selectIsLoading,
-  selectProducts,
-  selectTotalCount,
-} from '@/store/product/productsSelectors';
+// import { loadProducts } from '@/store/product/productsActions';
+// import {
+//   selectHasNextPage,
+//   selectIsLoading,
+//   selectProducts,
+//   selectTotalCount,
+// } from '@/store/product/productsSelectors';
 
 import { ProductCardSkeleton } from '../skeletons/ProductCardSkeleton';
 import { EmptyProduct } from './EmptyProduct';
 import { ProductCard } from './ProductCard';
 import { ProductRegistrationModal } from './ProductRegistrationModal';
+import { useAuthStore } from '../../../zustand/authStore';
+import { useProductsStore } from '../../../zustand/productStore';
 
 export const ProductList = ({ pageSize = PRODUCT_PAGE_SIZE }) => {
   const navigate = useNavigate();
@@ -33,25 +35,32 @@ export const ProductList = ({ pageSize = PRODUCT_PAGE_SIZE }) => {
   const [isIndexErrorModalOpen, setIsIndexErrorModalOpen] = useState(false);
   const [indexLink, setIndexLink] = useState(null);
 
-  const products = useAppSelector(selectProducts);
-  const hasNextPage = useAppSelector(selectHasNextPage);
-  const isLoading = useAppSelector(selectIsLoading);
+  // const products = useAppSelector(selectProducts);
+  // const hasNextPage = useAppSelector(selectHasNextPage);
+  // const isLoading = useAppSelector(selectIsLoading);
   const filter = useAppSelector(selectFilter);
-  const user = useAppSelector(selectUser);
-  const isLogin = useAppSelector(selectIsLogin);
-  const totalCount = useAppSelector(selectTotalCount);
+  // const user = useAppSelector(selectUser);
+  // const isLogin = useAppSelector(selectIsLogin);
+  // const totalCount = useAppSelector(selectTotalCount);
+  const {
+    products: items,
+    hasNextPage,
+    isLoading,
+    totalCount,
+    loadProducts,
+  } = useProductsStore();
+  const { isLogin, user } = useAuthStore();
 
   const loadProductsData = async (isInitial = false) => {
     try {
       const page = isInitial ? 1 : currentPage + 1;
-      await dispatch(
-        loadProducts({
-          filter,
-          pageSize,
-          page,
-          isInitial,
-        })
-      ).unwrap();
+      await loadProducts({
+        filter,
+        pageSize,
+        page,
+        isInitial,
+      });
+
       if (!isInitial) {
         setCurrentPage(page);
       }
