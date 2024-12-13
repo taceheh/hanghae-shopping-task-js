@@ -9,22 +9,10 @@ import { pageRoutes } from '@/apiRoutes';
 import { EMAIL_PATTERN } from '@/constants';
 import { Layout, authStatusType } from '@/pages/common/components/Layout';
 import { useAuthStore } from '../../zustand/authStore';
-// import { registerUser } from '@/store/auth/authActions';
-// import { useAppDispatch, useAppSelector } from '@/store/hooks';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
-  // const dispatch = useAppDispatch();
-  // const { registerStatus, registerError } = useAppSelector(
-  //   (state) => state.auth
-  // );
-  // const { registerStatus, registerError, registerUser } = useAuthStore(
-  //   (state) => ({
-  //     registerStatus: state.registerStatus,
-  //     registerError: state.registerError,
-  //     registerUser: state.registerUser,
-  //   })
-  // );
+
   const { registerStatus, registerError, registerUser } = useAuthStore();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -55,10 +43,9 @@ export const RegisterPage = () => {
     if (validateForm()) {
       try {
         await registerUser({ email, password, name });
-        // const response = registerUser({ email, password, name });
         console.log(registerStatus);
         console.log('가입 성공!');
-        // navigate(pageRoutes.login);
+        navigate(pageRoutes.login);
       } catch (error) {
         console.error(
           '회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.',

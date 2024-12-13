@@ -1,15 +1,18 @@
 import { pageRoutes } from '@/apiRoutes';
 import { Button } from '@/components/ui/button';
-import { selectTotalCount, selectTotalPrice } from '@/store/cart/cartSelectors';
-import { useAppSelector } from '@/store/hooks';
+import { useCartStore } from '../../../zustand/cartStore';
 import { formatNumber, formatPrice } from '@/utils/formatter';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export const PriceSummary = () => {
   const navigate = useNavigate();
-  const totalCount = useAppSelector(selectTotalCount);
-  const totalPrice = useAppSelector(selectTotalPrice);
+
+  // Zustand에서 totalCount와 totalPrice 가져오기
+  const { totalCount, totalPrice } = useCartStore((state) => ({
+    totalCount: state.totalCount,
+    totalPrice: state.totalPrice,
+  }));
 
   const handleClickPurchase = () => {
     navigate(pageRoutes.purchase);

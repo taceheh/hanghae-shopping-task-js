@@ -10,12 +10,14 @@ import {
 import { ShoppingCart } from 'lucide-react';
 import React from 'react';
 
-import { selectCart } from '@/store/cart/cartSelectors';
-import { useAppSelector } from '@/store/hooks';
+import { useCartStore } from '../../../zustand/cartStore';
 import { formatPrice } from '@/utils/formatter';
 
 export const ItemList = () => {
-  const cart = useAppSelector(selectCart);
+  // Zustand에서 cart 데이터 가져오기
+  const { cart } = useCartStore((state) => ({
+    cart: state.cart,
+  }));
 
   return (
     <Card className="mt-6">
@@ -35,7 +37,7 @@ export const ItemList = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {Object.values(cart).map(({ id, title, count, price }) => (
+            {cart.map(({ id, title, count, price }) => (
               <TableRow key={id}>
                 <TableCell>{title}</TableCell>
                 <TableCell>{count}개</TableCell>
