@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { getItem } from '@/helpers/localStorage';
 import {
   resetCartAtLocalStorage,
   setCartToLocalStorage,
@@ -11,7 +12,7 @@ export const useCartStore = create((set) => ({
   totalPrice: 0,
   initCart: (userId) => {
     if (!userId) return;
-    const prevCartItems = getCartFromLocalStorage(userId);
+    const prevCartItems = getItem(`cart_${userId}`) || [];
     const total = calculateTotal(prevCartItems);
     set({
       cart: prevCartItems,
@@ -20,7 +21,7 @@ export const useCartStore = create((set) => ({
     });
   },
   resetCart: (userId) => {
-    resetCartAtLocalStorage(userId);
+    setItem(`cart_${userId}`, []);
     set({
       cart: [],
       totalCount: 0,

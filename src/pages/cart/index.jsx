@@ -1,12 +1,14 @@
 import { CartTable } from '@/pages/cart/components/CartTable';
 import { EmptyNotice } from '@/pages/cart/components/EmptyNotice';
 import { Layout, authStatusType } from '@/pages/common/components/Layout';
-import { selectCart } from '@/store/cart/cartSelectors';
-import { useAppSelector } from '@/store/hooks';
 import React from 'react';
+import { useCartStore } from '../../zustand/cartStore';
 
 export const Cart = () => {
-  const cart = useAppSelector(selectCart);
+  // Zustand에서 cart 데이터 가져오기
+  const { cart } = useCartStore((state) => ({
+    cart: state.cart,
+  }));
   const isExist = cart.length > 0;
 
   return (

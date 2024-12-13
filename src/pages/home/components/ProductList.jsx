@@ -8,48 +8,32 @@ import { PRODUCT_PAGE_SIZE } from '@/constants';
 import { extractIndexLink, isFirebaseIndexError } from '@/helpers/error';
 import { useModal } from '@/hooks/useModal';
 import { FirebaseIndexErrorModal } from '@/pages/error/components/FirebaseIndexErrorModal';
-// import { selectIsLogin, selectUser } from '@/store/auth/authSelectors';
-import { addCartItem } from '@/store/cart/cartSlice';
-import { selectFilter } from '@/store/filter/filterSelectors';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-// import { loadProducts } from '@/store/product/productsActions';
-// import {
-//   selectHasNextPage,
-//   selectIsLoading,
-//   selectProducts,
-//   selectTotalCount,
-// } from '@/store/product/productsSelectors';
-
 import { ProductCardSkeleton } from '../skeletons/ProductCardSkeleton';
 import { EmptyProduct } from './EmptyProduct';
 import { ProductCard } from './ProductCard';
 import { ProductRegistrationModal } from './ProductRegistrationModal';
 import { useAuthStore } from '../../../zustand/authStore';
 import { useProductsStore } from '../../../zustand/productStore';
+import { useFilterStore } from '../../../zustand/filterStore';
+import { useCartStore } from '../../../zustand/cartStore';
 
 export const ProductList = ({ pageSize = PRODUCT_PAGE_SIZE }) => {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const { isOpen, openModal, closeModal } = useModal();
   const [currentPage, setCurrentPage] = useState(1);
   const [isIndexErrorModalOpen, setIsIndexErrorModalOpen] = useState(false);
   const [indexLink, setIndexLink] = useState(null);
-
-  // const products = useAppSelector(selectProducts);
-  // const hasNextPage = useAppSelector(selectHasNextPage);
-  // const isLoading = useAppSelector(selectIsLoading);
-  const filter = useAppSelector(selectFilter);
-  // const user = useAppSelector(selectUser);
-  // const isLogin = useAppSelector(selectIsLogin);
-  // const totalCount = useAppSelector(selectTotalCount);
+  const { minPrice, maxPrice, title, categoryId } = useFilterStore();
+  const filter = { minPrice, maxPrice, title, categoryId };
   const {
-    products: items,
+    items: products,
     hasNextPage,
     isLoading,
     totalCount,
     loadProducts,
   } = useProductsStore();
   const { isLogin, user } = useAuthStore();
+  const { addCartItem } = useCartStore();
 
   const loadProductsData = async (isInitial = false) => {
     try {
@@ -85,7 +69,7 @@ export const ProductList = ({ pageSize = PRODUCT_PAGE_SIZE }) => {
   const handleCartAction = (product) => {
     if (isLogin && user) {
       const cartItem = { ...product, count: 1 };
-      dispatch(addCartItem({ item: cartItem, userId: user.uid, count: 1 }));
+      addCartItem({ item: cartItem, userId: user.uid, count: 1 });
       console.log(`${product.title} 상품이 \n장바구니에 담겼습니다.`);
     } else {
       navigate(pageRoutes.login);
@@ -95,7 +79,7 @@ export const ProductList = ({ pageSize = PRODUCT_PAGE_SIZE }) => {
   const handlePurchaseAction = (product) => {
     if (isLogin && user) {
       const cartItem = { ...product, count: 1 };
-      dispatch(addCartItem({ item: cartItem, userId: user.uid, count: 1 }));
+      addCartItem({ item: cartItem, userId: user.uid, count: 1 });
       navigate(pageRoutes.cart);
     } else {
       navigate(pageRoutes.login);
@@ -107,10 +91,10 @@ export const ProductList = ({ pageSize = PRODUCT_PAGE_SIZE }) => {
     loadProductsData(true);
   };
 
-  const firstProductImage = products[0]?.image;
+  const firstProductImage = products?.[0]?.image;
 
   useEffect(() => {
-    if (firstProductImage) {
+    if (products.length > 0 && firstProductImage) {
       const img = new Image();
       img.src = firstProductImage;
     }

@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { registerUserAPI } from '@/api/auth';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@/firebase';
 
 export const useAuthStore = create((set) => ({
   isLogin: false,
@@ -11,7 +13,22 @@ export const useAuthStore = create((set) => ({
   setIsLogin: (isLogin) => set({ isLogin }),
   setUser: (user) => set({ user, isLogin: true }),
   logout: () => set({ isLogin: false, user: null }),
-
+  initializeAuth: () => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        set({
+          user: {
+            uid: user.uid,
+            email: user.email ?? '',
+            displayName: user.displayName ?? '',
+          },
+          isLogin: true,
+        });
+      } else {
+        set({ isLogin: false, user: null });
+      }
+    });
+  },
   // Async actions
   registerUser: async ({ email, password, name }) => {
     // console.log('zustand registerUser 호출 데이터:', { email, password, name }); // 확인용 로그

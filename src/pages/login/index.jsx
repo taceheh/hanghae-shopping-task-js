@@ -1,23 +1,24 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import Cookies from 'js-cookie';
 import { Lock, Mail } from 'lucide-react';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import {
+  getAuth,
+  setPersistence,
+  signInWithEmailAndPassword,
+  browserSessionPersistence,
+} from 'firebase/auth';
 import { pageRoutes } from '@/apiRoutes';
 import { EMAIL_PATTERN } from '@/constants';
 import { auth } from '@/firebase';
 import { Layout, authStatusType } from '@/pages/common/components/Layout';
 import { useAuthStore } from '../../zustand/authStore';
-// import { setIsLogin, setUser } from '@/store/auth/authSlice';
-// import { useAppDispatch } from '@/store/hooks';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  // const dispatch = useAppDispatch();
 
   const { setIsLogin, setUser } = useAuthStore();
 
@@ -47,6 +48,9 @@ export const LoginPage = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
+        const auth = getAuth();
+        await setPersistence(auth, browserSessionPersistence);
+
         const userCredential = await signInWithEmailAndPassword(
           auth,
           email,
@@ -65,16 +69,17 @@ export const LoginPage = () => {
             displayName: user.displayName ?? '',
           });
         }
-
         navigate(pageRoutes.main);
       } catch (error) {
-        console.error(
-          '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.',
-          error
-        );
-        setErrors({
-          form: '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.',
-        });
+        console.error('로그인에 실패했습니다:', error);
+        const errorMessage =
+          error.code === 'auth/wrong-password'
+            ? '비밀번호가 올바르지 않습니다.'
+            : error.code === 'auth/user-not-found'
+              ? '사용자를 찾을 수 없습니다.'
+              : '로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.';
+
+        setErrors({ form: errorMessage });
       }
     }
   };
